@@ -1,3 +1,3 @@
 3 + 4 * 10
-  + -20 *2
-  var int float32 := switch else else if 
++ -20 *2
+var int float32 := switch else else if
