@@ -1,0 +1,32 @@
+tokens required : 
+
+int-
+float32-
+string-
+bool-
+var - 
+:= (not needed i guess)
+equals - 
+double quotes
+true - 
+false - 
+const - 
+operators : (+ , - , / , * , % , ++ , --)
+			(!= , ==, >, <, >=, <=)
+if - 
+else - 
+else if - 
+switch - 
+case - 
+for loop - 
+continue - 
+break - 
+func (functions) - 
+
+
+grammar for:
+variable definition
+multiple variable definitions
+remember naming rules
+arrays
+
