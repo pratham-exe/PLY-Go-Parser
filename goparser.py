@@ -1,7 +1,6 @@
 import ply.lex as lex
 import ply.yacc as yacc
 
-
 tokens = (
     'NUMBER',
     'MINUS',
@@ -36,9 +35,10 @@ tokens = (
     'FLOATINGNUMBER',
     'BOOLEAN',
     'COMMA',
-    'LSQBRACE',
-    'RSQBRACE',
-    'ARRAY',
+    'LSQUARE',
+    'RSQUARE',
+    'SQUOTE',
+    'DQUOTE'
 )
 
 t_PLUS    = r'\+'
@@ -50,16 +50,18 @@ t_RPAREN  = r'\)'
 t_COLON = r':'
 t_LBRACE = r'\{'
 t_RBRACE =  r'\}'
-t_BOOLEAN = r"true|false"
-t_COMMA = r","
-t_EQUALS = r'\='
-t_DEQUALS = r'=='
-t_LESSTHAN = r"<"
-t_GREATERTHAN = r">"
 t_GREATERTHANEQ = r'>='
 t_LESSTHANEQ = r'<='
-t_LSQBRACE = r"\["
-t_RSQBRACE = r"\]"
+t_EQUALS = r'\='
+t_DEQUALS = r'=='
+t_BOOLEAN = r"true|false"
+t_COMMA = r","
+t_LESSTHAN = r"<"
+t_GREATERTHAN = r">"
+t_LSQUARE = r'\['
+t_RSQUARE = r'\]'
+t_SQUOTE = r"\'"
+t_DQUOTE = r'\"'
 
 reserved = {
     'while' : 'WHILE',
@@ -81,7 +83,6 @@ def t_SEMICOLON(t):
     r';'
     return t
 
-
 def t_FLOATINGNUMBER(t):
     r'[-+]?[0-9]*\.[0-9]+'
     t.value = float(t.value[1:-1])
@@ -96,7 +97,6 @@ def t_ID(t):
     r'[a-zA-Z_][a-zA-Z_0-9]*'
     t.type = reserved.get(t.value, 'ID')
     return t
-
 
 def t_NUMBER(t):
     r'\d+'
@@ -113,12 +113,17 @@ def t_error(t):
     print("Illegal character '%s'" % t.value[0])
     t.lexer.skip(1)
 
-
 lexer = lex.lex()
-
 
 def p_program(p):
     '''program : statements
+               | VAR ID EQUALS LSQUARE NUMBER RSQUARE type_specifier LBRACE NUMBER RBRACE
+               | VAR ID EQUALS LSQUARE NUMBER RSQUARE type_specifier LBRACE NUMBER int_numbers RBRACE
+               | VAR ID EQUALS LSQUARE NUMBER RSQUARE type_specifier LBRACE RBRACE
+               | VAR ID EQUALS LSQUARE NUMBER RSQUARE type_specifier LBRACE SQUOTE ID SQUOTE RBRACE
+               | VAR ID EQUALS LSQUARE NUMBER RSQUARE type_specifier LBRACE DQUOTE ID DQUOTE RBRACE
+               | VAR ID EQUALS LSQUARE NUMBER RSQUARE type_specifier LBRACE SQUOTE ID SQUOTE strings RBRACE
+               | VAR ID EQUALS LSQUARE NUMBER RSQUARE type_specifier LBRACE DQUOTE ID DQUOTE strings RBRACE
     '''
     p[0] = p[1]
 
@@ -131,13 +136,11 @@ def p_type_specifier(p):
     if len(p) == 2:
         p[0] = p[1]
 
-
 def p_declaration(p):
     '''declaration : VAR ID type_specifier 
                    | VAR ID ids type_specifier 
                    | CONST ID type_specifier 
                    | CONST ID ids type_specifier
-                   | VAR ID EQUALS LSQBRACE NUMBER RSQBRACE type_specifier LBRACE RBRACE
     '''
     if len(p) == 3:
         p[0] = ('declaration', p[1], [p[2]])
@@ -150,13 +153,25 @@ def p_ids(p):
     '''
     p[0] = p[2]
 
+def p_strings(p):
+    '''strings : COMMA SQUOTE ID SQUOTE strings
+               | COMMA DQUOTE ID DQUOTE strings
+               | COMMA SQUOTE ID SQUOTE
+               | COMMA DQUOTE ID DQUOTE
+    '''
+    p[0] = p[2]
+
+def p_int_numbers(p):
+    '''int_numbers : COMMA NUMBER int_numbers
+                   | COMMA NUMBER
+    '''
+    p[0] = p[2]
 
 def p_switch_statement(p):
     '''switch_statement : SWITCH ID LBRACE case_statements RBRACE
                         | SWITCH NUMBER LBRACE case_statements RBRACE
     '''
     p[0] = ('switch', p[2], p[4])
-
 
 def p_case_statements(p):
     '''case_statements : case_statement
@@ -187,7 +202,6 @@ def p_statements(p):
 def p_empty(p):
     'empty :'
     pass
-    p[0]
 
 def p_statement(p): 
     '''statement : IF LPAREN expression RPAREN LBRACE program RBRACE
@@ -236,31 +250,30 @@ def p_assignment(p):
 def p_function_declaration(p):
     ''' function_declaration : FUNCTION ID LPAREN parameters RPAREN
     '''
-
     p[0] = ("function_declaration", p[1])
 
 def p_parameters(p):
     ''' parameters : parameter COMMA parameters
                    | parameter
     '''
-    p[0] = p[1]
+    p[0] = p[0]
 
 def p_parameter(p):
     ''' parameter : ID type_specifier 
                   | empty
     '''
-    p[0] = p[1]
+    p[0] = p[0]
 
 def p_error(p):
     print(f"Syntax error at '{p.value}'")
 
 parser = yacc.yacc()
 
-
 data = """ 
 var x int
 const y bool
 const x, y string
+
 switch 1 {
     case 1:
         x = 10
@@ -270,14 +283,18 @@ switch y {
         var x float32
 }
 
-if(x>10){
+if (x > 10) {
     x = x + 10
 }
 
-var x = [2]int{}
+var arr1 = [3] int {1, 2, 3}
 
 func myfunction(x int, y float32, f string)
 
+"""
+
+data1 = """
+var arr2 = [3] string {"Volvo", "Mercedes", "BMW"}
 """
 
 lexer.input(data)
@@ -293,4 +310,3 @@ if (result):
     print("Accepted!")
 else:
     print("Rejected!")
-
