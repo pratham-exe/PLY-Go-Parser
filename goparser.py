@@ -36,6 +36,9 @@ tokens = (
     'FLOATINGNUMBER',
     'BOOLEAN',
     'COMMA',
+    'LSQBRACE',
+    'RSQBRACE',
+    'ARRAY',
 )
 
 t_PLUS    = r'\+'
@@ -47,14 +50,16 @@ t_RPAREN  = r'\)'
 t_COLON = r':'
 t_LBRACE = r'\{'
 t_RBRACE =  r'\}'
-t_GREATERTHANEQ = r'>='
-t_LESSTHANEQ = r'<='
-t_EQUALS = r'\='
-t_DEQUALS = r'=='
 t_BOOLEAN = r"true|false"
 t_COMMA = r","
+t_EQUALS = r'\='
+t_DEQUALS = r'=='
 t_LESSTHAN = r"<"
 t_GREATERTHAN = r">"
+t_GREATERTHANEQ = r'>='
+t_LESSTHANEQ = r'<='
+t_LSQBRACE = r"\["
+t_RSQBRACE = r"\]"
 
 reserved = {
     'while' : 'WHILE',
@@ -98,7 +103,6 @@ def t_NUMBER(t):
     t.value = int(t.value)
     return t
 
-
 def t_newline(t):
     r'\n+'
     t.lexer.lineno += len(t.value)
@@ -112,11 +116,6 @@ def t_error(t):
 
 lexer = lex.lex()
 
-
-#precedence = (
-#    ('left', 'PLUS', 'MINUS'),
-#    ('left', 'MUL', 'DIVIDE'),
-#)
 
 def p_program(p):
     '''program : statements
@@ -138,6 +137,7 @@ def p_declaration(p):
                    | VAR ID ids type_specifier 
                    | CONST ID type_specifier 
                    | CONST ID ids type_specifier
+                   | VAR ID EQUALS LSQBRACE NUMBER RSQBRACE type_specifier LBRACE RBRACE
     '''
     if len(p) == 3:
         p[0] = ('declaration', p[1], [p[2]])
@@ -187,6 +187,7 @@ def p_statements(p):
 def p_empty(p):
     'empty :'
     pass
+    p[0]
 
 def p_statement(p): 
     '''statement : IF LPAREN expression RPAREN LBRACE program RBRACE
@@ -242,14 +243,13 @@ def p_parameters(p):
     ''' parameters : parameter COMMA parameters
                    | parameter
     '''
-    p[0] = p[0]
+    p[0] = p[1]
 
 def p_parameter(p):
     ''' parameter : ID type_specifier 
                   | empty
     '''
-    p[0] = p[0]
-
+    p[0] = p[1]
 
 def p_error(p):
     print(f"Syntax error at '{p.value}'")
@@ -274,7 +274,10 @@ if(x>10){
     x = x + 10
 }
 
+var x = [2]int{}
+
 func myfunction(x int, y float32, f string)
+
 """
 
 lexer.input(data)
@@ -291,7 +294,3 @@ if (result):
 else:
     print("Rejected!")
 
-
-# Issues  more than 2 varibles declared in the same line
-#         no function definition
-#         greater that eq etc not working
