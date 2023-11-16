@@ -117,13 +117,6 @@ lexer = lex.lex()
 
 def p_program(p):
     '''program : statements
-               | VAR ID EQUALS LSQUARE NUMBER RSQUARE type_specifier LBRACE NUMBER RBRACE
-               | VAR ID EQUALS LSQUARE NUMBER RSQUARE type_specifier LBRACE NUMBER int_numbers RBRACE
-               | VAR ID EQUALS LSQUARE NUMBER RSQUARE type_specifier LBRACE RBRACE
-               | VAR ID EQUALS LSQUARE NUMBER RSQUARE type_specifier LBRACE SQUOTE ID SQUOTE RBRACE
-               | VAR ID EQUALS LSQUARE NUMBER RSQUARE type_specifier LBRACE DQUOTE ID DQUOTE RBRACE
-               | VAR ID EQUALS LSQUARE NUMBER RSQUARE type_specifier LBRACE SQUOTE ID SQUOTE strings RBRACE
-               | VAR ID EQUALS LSQUARE NUMBER RSQUARE type_specifier LBRACE DQUOTE ID DQUOTE strings RBRACE
     '''
     p[0] = p[1]
 
@@ -141,6 +134,13 @@ def p_declaration(p):
                    | VAR ID ids type_specifier 
                    | CONST ID type_specifier 
                    | CONST ID ids type_specifier
+                   | VAR ID EQUALS LSQUARE NUMBER RSQUARE type_specifier LBRACE NUMBER RBRACE
+                   | VAR ID EQUALS LSQUARE NUMBER RSQUARE type_specifier LBRACE NUMBER int_numbers RBRACE
+                   | VAR ID EQUALS LSQUARE NUMBER RSQUARE type_specifier LBRACE RBRACE
+                   | VAR ID EQUALS LSQUARE NUMBER RSQUARE type_specifier LBRACE SQUOTE ID SQUOTE RBRACE
+                   | VAR ID EQUALS LSQUARE NUMBER RSQUARE type_specifier LBRACE DQUOTE ID DQUOTE RBRACE
+                   | VAR ID EQUALS LSQUARE NUMBER RSQUARE type_specifier LBRACE SQUOTE ID SQUOTE strings RBRACE
+                   | VAR ID EQUALS LSQUARE NUMBER RSQUARE type_specifier LBRACE DQUOTE ID DQUOTE strings RBRACE
     '''
     if len(p) == 3:
         p[0] = ('declaration', p[1], [p[2]])
@@ -291,10 +291,6 @@ var arr1 = [3] int {1, 2, 3}
 
 func myfunction(x int, y float32, f string)
 
-"""
-
-data1 = """
-var arr2 = [3] string {"Volvo", "Mercedes", "BMW"}
 """
 
 lexer.input(data)
