@@ -206,7 +206,7 @@ def p_empty(p):
 def p_statement(p): 
     '''statement : IF LPAREN expression RPAREN LBRACE program RBRACE
                  | IF LPAREN expression RPAREN LBRACE program RBRACE ELSE LBRACE program RBRACE
-                 | FOR assignment SEMICOLON expression SEMICOLON expression LBRACE program RBRACE
+                 | FOR assignment SEMICOLON expression SEMICOLON assignment LBRACE program RBRACE
                  | assignment
                  | switch_statement
     '''
@@ -288,6 +288,10 @@ if (x > 10) {
 }
 
 var arr1 = [3] int {1, 2, 3}
+
+for i = 0; i < 5; i = i + 1 {
+    a = a + 10
+}
 
 func myfunction(x int, y float32, f string)
 
